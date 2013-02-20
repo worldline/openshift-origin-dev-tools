@@ -107,7 +107,7 @@ mkdir -p /tmp/rhc/junit
     def scp_remote_tests(hostname, branch, repo_parent_dir="/root", user="root")
       init_repos(hostname, true, nil, repo_parent_dir, user)
       sync_repos(hostname, repo_parent_dir, user)
-      update_remote_tests(hostname, branch, repo_parent_dir, user)
+      update_remote_tests(hostname, nil, repo_parent_dir, user)
     end
     
     def sync_repos(hostname, remote_repo_parent_dir="/root", sshuser="root")

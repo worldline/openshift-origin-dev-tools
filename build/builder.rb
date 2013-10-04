@@ -248,7 +248,10 @@ module OpenShift
       if (defined? download_artifacts) && instance && (instance_status(instance) == :running) && options.download_artifacts?
         download_artifacts(instance.dns_name)
       end
-      terminate_instance(instance, true) if instance
+      if instance
+        terminate_instance(instance, true)
+        find_same_name_instances(conn, tag, true, false)
+      end
     end
 
     desc "update_ssh_config TAG", "Updates the verifier entry in the ssh config file with the dns info from tag"

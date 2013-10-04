@@ -150,29 +150,44 @@ module OpenShift
       end
       instances.each do |i|
         if (instance_status(i) != :terminated)
-          puts "Found instance #{i.id} (#{i.tags["Name"]})" unless silent
+          puts "Found instance will be terminated: #{i.id} (#{i.tags["Name"]})" unless silent
           block_until_available(i, ssh_user) if block_until_available
           return i
         end
       end
 
       puts "No instance found matching #{name}"
-
       # If we are searching by tag, then find instances with names for
       # which the given name is a prefix, and suggest these instances.
-      matches = 0
       if use_tag
         instances = conn.instances.filter('tag-key', 'Name').filter('tag-value', "#{name}*")
-        instances.each do |i|
-          if (instance_status(i) != :terminated)
-            puts "Did you mean one of the following?" if matches == 0
-            puts "  #{i.tags["Name"]}"
-            matches = matches + 1
+        if instances.any?
+          puts "Did you mean one of the following?"
+          instances.each do |i|
+            if (instance_status(i) != :terminated)
+              puts "  #{i.tags["Name"]} - #{i.id}"
+            end
           end
         end
       end
 
       return nil
+    end
+
+    def find_same_name_instances(conn, name, use_tag=false, silent=false)
+      if use_tag
+        instances = conn.instances.filter('tag-key', 'Name').filter('tag-value', name)
+      else
+        instances = conn.instances.filter('dns-name', name)
+      end
+      if instances.any?
+        puts "Found instances with same name:"
+        instances.each do |i|
+          if (instance_status(i) != :terminated)
+            puts "  #{i.tags["Name"]} - #{i.id}" unless silent
+          end
+        end
+      end
     end
 
     def terminate_instance(instance, handle_unauthorized=false)

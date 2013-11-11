@@ -326,6 +326,7 @@ module OpenShift
     method_option :verbose, :type => :boolean, :desc => "Enable verbose logging"
     method_option :official, :type => :boolean, :desc => "For official use.  Send emails, etc."
     method_option :exclude_broker, :type => :boolean, :desc => "Exclude broker tests"
+    method_option :exclude_node, :type => :boolean, :desc => "Exclude node tests"
     method_option :exclude_cartridge, :type => :boolean, :desc => "Exclude cartridge tests"
     method_option :exclude_site, :type => :boolean, :desc => "Exclude site tests"
     method_option :exclude_rhc, :type => :boolean, :desc => "Exclude rhc tests"

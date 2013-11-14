@@ -59,7 +59,7 @@ module OpenShift
         filter("state", "available").
         filter("name", filter)
     end
-
+          
     def delete_detached_volumes(conn)
       volumes = conn.volumes.filter("status", "available")
       volumes.each do |volume|
@@ -69,7 +69,7 @@ module OpenShift
         end
       end
     end
-
+          
     def delete_unused_snapshots(conn)
       snapshots = conn.snapshots.with_owner(:self).filter("status", "completed")
       snapshots.each do |snapshot|
@@ -83,7 +83,7 @@ module OpenShift
         end
       end
     end
-
+    
     def get_specific_public_ami(conn, filter_val)
       if filter_val.start_with?("ami")
         filter_param = "image-id"
@@ -98,7 +98,7 @@ module OpenShift
         devenv_amis.to_a[0]
       end
     end
-
+    
     def get_specific_ami(conn, filter_val)
       if filter_val.start_with?("ami")
         filter_param = "image-id"
@@ -174,7 +174,7 @@ module OpenShift
 
       return nil
     end
-
+      
     def terminate_instance(instance, handle_unauthorized=false)
       if !instance.api_termination_disabled?
         begin
@@ -206,7 +206,7 @@ module OpenShift
         puts "Termination protection is enabled for: #{instance.id} (#{instance.tags["Name"]})"
       end
     end
-
+        
     def add_tag(instance, name, retries=2)
       (1..retries).each do |i|
         begin
@@ -274,8 +274,10 @@ module OpenShift
       end
 
       hostname = instance.dns_name
-      unless can_ssh?(hostname, ssh_user)
-        repair_ssh(instance, ssh_user)
+      (1..30).each do
+        break if can_ssh?(hostname, ssh_user)
+        log.info "SSH access failed... retrying"
+        sleep 5
       end
 
       unless can_ssh?(hostname, ssh_user)
@@ -284,17 +286,6 @@ module OpenShift
       end
 
       log.info "Instance (#{hostname}) is accessible"
-    end
-
-    def repair_ssh(instance, ssh_user='root')
-      output, exit_code = ssh(instance.dns_name, "echo Success", 90, true, 4, ssh_user)
-      if exit_code == 254
-        puts "Rebooting instance..."
-        instance.reboot
-        puts "Done"
-        output, exit_code = ssh(instance.dns_name, "echo Success", 90, true, 8, ssh_user)
-      end
-      return exit_code == 0
     end
 
     def is_valid?(hostname, ssh_user="root")
@@ -353,7 +344,7 @@ module OpenShift
       log.info "Done"
     end
 
-    def register_image(conn, instance, name, manifest, ssh_user='root')
+    def register_image(conn, instance, name, manifest)
       puts "Registering AMI..."
       outer_num_retries = 4
       image = nil
@@ -367,9 +358,6 @@ module OpenShift
             sleep 30 until image.state == :available
             puts "Sleeping for 30 seconds to let image stabilize..."
             sleep 30
-            unless can_ssh?(instance.dns_name, ssh_user)
-              repair_ssh(instance, ssh_user)
-            end
             break
           rescue Exception => e
             raise if index == num_retries && outer_index == outer_num_retries
@@ -402,7 +390,7 @@ module OpenShift
         end
       end
     end
-
+    
     def terminate_old_verifiers(conn)
       AWS.memoize do
         build_name_to_verifiers = {}

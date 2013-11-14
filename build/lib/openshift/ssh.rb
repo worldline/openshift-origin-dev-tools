@@ -53,12 +53,12 @@ module OpenShift
             PTY.spawn( ssh_cmd ) do |r, w, pid|
               begin
                 r.each { |line| last_line = line; print line }
-             rescue Errno::EIO
-             end
-           end
-         rescue PTY::ChildExited => e
+              rescue Errno::EIO
+              end
+            end
+          rescue PTY::ChildExited => e
             log.debug "The child process exited!"
-         end
+          end
         end
       rescue Timeout::Error
         log.error "\nSSH command to #{hostname} timed out (timeout = #{timeout})"

@@ -287,12 +287,12 @@ module OpenShift
     end
 
     def repair_ssh(instance, ssh_user='root')
-      output, exit_code = ssh(instance.dns_name, "whoami", 90, true, 4, ssh_user)
+      output, exit_code = ssh(instance.dns_name, "echo Success", 90, true, 4, ssh_user)
       if exit_code == 254
         puts "Rebooting instance..."
         instance.reboot
         puts "Done"
-        output, exit_code = ssh(instance.dns_name, "whoami", 90, true, 8, ssh_user)
+        output, exit_code = ssh(instance.dns_name, "echo Success", 90, true, 8, ssh_user)
       end
       return exit_code == 0
     end

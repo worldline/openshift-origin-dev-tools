@@ -28,6 +28,7 @@ module OpenShift
             sleep 10
           end
         rescue Timeout::Error
+          exit_code = 254
           log.error "SSH command to #{hostname} timed out (timeout = #{timeout})"
         end
       end

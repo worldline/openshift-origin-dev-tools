@@ -343,7 +343,7 @@ module OpenShift
       image.add_tag('Name', :value => VERIFIED_TAG)
       log.info "Done"
     end
-    
+
     def register_image(conn, instance, name, manifest)
       puts "Registering AMI..."
       outer_num_retries = 4

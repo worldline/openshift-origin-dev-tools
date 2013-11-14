@@ -427,7 +427,7 @@ END
     end
 
     def reboot(instance)
-      print "Rebooting instance to apply new kernel..."
+      print "Rebooting instance..."
       instance.reboot
       puts "Done"
     end

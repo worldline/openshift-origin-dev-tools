@@ -1035,7 +1035,7 @@ EOF
             reset_eth0_dns_config(hostname, options)
 
             manifest = rpm_manifest(hostname, options.ssh_user)
-            registered_ami = register_image(conn, instance, name + '_' + build_num, manifest)
+            registered_ami = register_image(conn, instance, name + '_' + build_num, manifest, options.ssh_user)
             image_id = registered_ami.id
           end
 

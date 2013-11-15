@@ -275,7 +275,7 @@ module OpenShift
 
       hostname = instance.dns_name
       unless can_ssh?(hostname, ssh_user)
-        repair_ssh(instance, ssh_user)
+        repair_ssh(instance, 16, ssh_user)
       end
 
       unless can_ssh?(hostname, ssh_user)
@@ -286,13 +286,13 @@ module OpenShift
       log.info "Instance (#{hostname}) is accessible"
     end
 
-    def repair_ssh(instance, ssh_user='root')
-      output, exit_code = ssh(instance.dns_name, "echo Success", 90, true, 8, ssh_user)
+    def repair_ssh(instance, retries=8, ssh_user='root')
+      output, exit_code = ssh(instance.dns_name, "echo Success", 90, true, retries, ssh_user)
       if exit_code == 255
         puts "Rebooting instance..."
         instance.reboot
         puts "Done"
-        output, exit_code = ssh(instance.dns_name, "echo Success", 90, true, 8, ssh_user)
+        output, exit_code = ssh(instance.dns_name, "echo Success", 90, true, retries, ssh_user)
       end
       return exit_code == 0
     end
@@ -368,7 +368,7 @@ module OpenShift
             puts "Sleeping for 30 seconds to let image stabilize..."
             sleep 30
             unless can_ssh?(instance.dns_name, ssh_user)
-              repair_ssh(instance, ssh_user)
+              repair_ssh(instance, 8, ssh_user)
             end
             break
           rescue Exception => e

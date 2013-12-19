@@ -543,7 +543,10 @@ chmod +x /tmp/reset_test_dir.sh
             test[:exit_code]  = exit_code
             test[:success] = exit_code == 0
             test[:completed] = true
-
+            # 255 indicates ssh timeout, we can't run it again because the rerun file will
+            # be incomplete, so leave the test marked as complete but timed out.
+            test[:timed_out] = exit_code == 255
+            
             still_running_tests = test_queues.map do |q|
               q.select{ |t| t[:completed] != true }
             end
@@ -557,6 +560,19 @@ chmod +x /tmp/reset_test_dir.sh
               end
               puts "\n\n\n"
             end
+            
+            timed_out_tests = test_queues.map do |q|
+              q.select{ |t| t[:timed_out] == true }
+            end
+            if timed_out_tests.length > 0              
+              puts "Timed Out Tests:"
+              timed_out_tests.each_index do |q_idx|                
+                print timed_out_tests[q_idx].map{ |t| "\t#{t[:title]}" }.join("\n"), "\n"
+              end
+              puts "\n\n\n"
+            end
+
+
           end
         end
       end
@@ -576,7 +592,7 @@ chmod +x /tmp/reset_test_dir.sh
         failures.each do |failed_test|
           if failed_test[:options].has_key?(:cucumber_rerun_file)
             retry_queue << build_cucumber_command(failed_test[:title], [], failed_test[:options][:env],
-                                                  failed_test[:options][:cucumber_rerun_file],
+                                                  failed_test[:timed_out]?nil:failed_test[:options][:cucumber_rerun_file],
                                                   failed_test[:options][:test_dir],
                                                   "*.feature",
                                                   failed_test[:options][:require_gemfile_dir],
@@ -588,12 +604,12 @@ chmod +x /tmp/reset_test_dir.sh
                 scenario = $2
                 if failed_test[:options][:retry_indivigually]
                   retry_queue << build_cucumber_command(failed_test[:title], [], failed_test[:options][:env],
-                                                        failed_test[:options][:cucumber_rerun_file],
+                                                        failed_test[:timed_out]?nil:failed_test[:options][:cucumber_rerun_file],
                                                         failed_test[:options][:test_dir],
                                                         "#{test}:#{scenario}")
                 else
                   retry_queue << build_cucumber_command(failed_test[:title], [], failed_test[:options][:env],
-                                                        failed_test[:options][:cucumber_rerun_file],
+                                                        failed_test[:timed_out]?nil:failed_test[:options][:cucumber_rerun_file],
                                                         failed_test[:options][:test_dir],
                                                         "#{test}")
                 end

@@ -474,7 +474,7 @@ EOF
 chmod +x /tmp/reset_test_dir.sh
 }, 120, true, 1, ssh_user)
       ssh(hostname, "sudo bash -c '/tmp/reset_test_dir.sh'" , 120, true, 1, ssh_user)
-      ssh(hostname, "sudo bash -c 'rm -rf /var/www/openshift/broker/tmp/cache/*'" , 120, true, 1, ssh_user)
+      ssh(hostname, "sudo bash -c \"rm -rf /var/www/openshift/broker/tmp/cache/*\"" , 120, true, 1, ssh_user)
     end
 
     def devenv_branch_wildcard(branch)
@@ -561,18 +561,37 @@ chmod +x /tmp/reset_test_dir.sh
               puts "\n\n\n"
             end
             
-            timed_out_tests = test_queues.map do |q|
-              q.select{ |t| t[:timed_out] == true }
+            all_tests=[]
+            test_queues.each do |q|
+              all_tests += q
             end
-            if timed_out_tests.length > 0              
+            
+            timed_out_tests=all_tests.select{ |t| t[:timed_out] == true }
+            unless timed_out_tests.empty?
               puts "Timed Out Tests:"
-              timed_out_tests.each_index do |q_idx|                
-                print timed_out_tests[q_idx].map{ |t| "\t#{t[:title]}" }.join("\n"), "\n"
+              timed_out_tests.each do |t|                
+                print "\t#{t[:title]}\n" 
+              end
+              puts "\n\n\n"
+            end
+            
+            failed_tests = all_tests.select{ |t| t[:success] == false && t[:completed] == true && t[:timed_out] != true }
+            unless failed_tests.empty?
+              puts "Failed Tests:"
+              failed_tests.each do |t|                
+                print "\t#{t[:title]}\n" 
               end
               puts "\n\n\n"
             end
 
-
+            passed_tests = all_tests.select{ |t| t[:success] == true && t[:completed] == true }
+            unless passed_tests.empty?
+              puts "Passed Tests:"
+              passed_tests.each do |t|                
+                print "\t#{t[:title]}\n" 
+              end
+              puts "\n\n\n"
+            end
           end
         end
       end
@@ -591,7 +610,7 @@ chmod +x /tmp/reset_test_dir.sh
         #process failures
         failures.each do |failed_test|
           if failed_test[:options].has_key?(:cucumber_rerun_file)
-            retry_queue << build_cucumber_command(failed_test[:title], [], failed_test[:options][:env],
+            retry_queue << build_cucumber_command(failed_test[:title], failed_test[:tags], failed_test[:options][:env],
                                                   failed_test[:timed_out]?nil:failed_test[:options][:cucumber_rerun_file],
                                                   failed_test[:options][:test_dir],
                                                   "*.feature",
@@ -603,12 +622,12 @@ chmod +x /tmp/reset_test_dir.sh
                 test = $1
                 scenario = $2
                 if failed_test[:options][:retry_indivigually]
-                  retry_queue << build_cucumber_command(failed_test[:title], [], failed_test[:options][:env],
+                  retry_queue << build_cucumber_command(failed_test[:title], failed_test[:tags], failed_test[:options][:env],
                                                         failed_test[:timed_out]?nil:failed_test[:options][:cucumber_rerun_file],
                                                         failed_test[:options][:test_dir],
                                                         "#{test}:#{scenario}")
                 else
-                  retry_queue << build_cucumber_command(failed_test[:title], [], failed_test[:options][:env],
+                  retry_queue << build_cucumber_command(failed_test[:title], failed_test[:tags], failed_test[:options][:env],
                                                         failed_test[:timed_out]?nil:failed_test[:options][:cucumber_rerun_file],
                                                         failed_test[:options][:test_dir],
                                                         "#{test}")
@@ -670,7 +689,7 @@ chmod +x /tmp/reset_test_dir.sh
         when "fedora-18"
           tags += ["~@fedora-19-only", "~@rhel-only", "~@not-fedora-18", "~@jboss", "~@not-origin"]
       end
-      opts += tags.map{ |t| "-t #{t}"}
+      opts += tags.uniq.map{ |t| "-t #{t}"}
       opts << "-r #{test_dir}"
       if old_rerun_file.nil?
         opts << "#{test_dir}/#{feature_file}"
@@ -687,7 +706,8 @@ chmod +x /tmp/reset_test_dir.sh
               :require_gemfile_dir => require_gemfile_dir,
               :other_outputs => other_outputs
              },
-         :title => title
+         :title => title,
+         :tags => tags
         }
       else
         {:command => wrap_test_command("cucumber #{opts.join(' ')}", env),
@@ -698,7 +718,8 @@ chmod +x /tmp/reset_test_dir.sh
              :env => env,
              :other_outputs => other_outputs
          },
-         :title => title}
+         :title => title,
+         :tags => tags}
       end
     end
 

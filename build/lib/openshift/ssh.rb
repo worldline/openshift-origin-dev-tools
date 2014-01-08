@@ -21,9 +21,7 @@ module OpenShift
           if exit_code == 0
             break
           elsif i == num_tries
-            if num_tries > 1
-              puts "\nSSH failed to #{hostname} with exit_code: #{exit_code}  and output: #{output}"
-            end
+            log.error "\nSSH command #{ssh_cmd} failed to #{hostname} with exit_code: #{exit_code}  and output: #{output}, try #{i} of #{num_tries}"
           else
             sleep 10
           end

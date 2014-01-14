@@ -153,10 +153,18 @@ module OpenShift
       end
 
       def requires
-        @requires ||= spec_file.lines.to_a.inject([]) do |a,s|
-          match = s.match(/^\s*Requires:\s*(.+)$/)
-          a << Require.new(replace_globals(match[1].gsub('?scl:%scl_prefix', 'scl_prefix'))) if match
-          a
+        return @requires unless @requires.nil?
+        f = Tempfile.new("#{name}.spec")
+        begin
+          f.write(spec_file) && f.close
+          rpm_spec = `rpmspec -q --requires #{f.path}`
+          @requires = rpm_spec.lines.map do |line|
+            line = sanitize_require_name(line)
+            next if line == '/bin/sh' # Skip the '/bin/sh' requirement (?)
+            Require.new(replace_globals(line))
+          end.compact
+        ensure
+          f.unlink
         end
       end
 
@@ -211,6 +219,15 @@ module OpenShift
       end
 
       protected
+
+        def sanitize_require_name(require_name)
+          require_name.strip!
+          require_name.gsub!(/(\(|\))/, '-')  # rubygem(bla) -> rubygem-bla-
+          require_name.gsub!('?scl:%scl_prefix', 'scl_prefix')
+          require_name.chomp!('-')  # removes the '-' after bla ;-)
+          require_name
+        end
+
         def replace_globals(s)
           while (s =~ /%\{([^\{\}]*)\}/)
             var_name = $1

@@ -422,7 +422,7 @@ module OpenShift
               build_num = verifier[0]
               i = verifier[1]
               opts = verifier[2]
-              max_run_time = opts[:max_run_time] ? opts[:max_run_time] : 9000 #2.5 hours
+              max_run_time = opts[:max_run_time] ? opts[:max_run_time] : 14400 #4 hours
               if (index == verifiers.length - 1) || opts[:multiple]
                 unless Time.new - i.launch_time > max_run_time
                   next

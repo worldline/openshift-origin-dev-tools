@@ -632,10 +632,10 @@ chmod +x /tmp/reset_test_dir.sh
               end
             end
           elsif failed_test[:options][:retry_individually] && failed_test[:output].include?("Failure:") && failed_test[:output].include?("rake_test_loader")
-            found_test = false
+            found_tests = true
+            rake_retries = []
             failed_test[:output].lines.each do |line|
               if line =~ /\A(test_\w+)\((\w+Test)\) \[\/.*\/(test\/.*_test\.rb):(\d+)\]:/
-                found_test = true
                 test_name = $1
                 class_name = $2
                 file_name = $3
@@ -646,14 +646,21 @@ chmod +x /tmp/reset_test_dir.sh
                 if cmd =~ /\A(cd .+?; )/
                   chdir_command = $1
                 end
-                retry_queue << build_rake_command("#{class_name} (#{test_name})", "#{chdir_command} ruby -Ilib:test #{file_name} -n #{test_name}", true)
+                rake_retries << build_rake_command("#{class_name} (#{test_name})", "#{chdir_command} ruby -Ilib:test #{file_name} -n #{test_name}", true)
+              elsif line =~ /\A(test_\w+)\((\w+)\) \[\/.*\/(.*\.rb):(\d+)\]:/
+                found_tests = false
+                break
               end
             end
-            retry_queue << {
-                :command  => failed_test[:command],
-                :options  => failed_test[:options],
-                :title    => failed_test[:title]
-            }
+            if found_tests && !rake_retries.empty?
+              retry_queue += rake_retries
+            else
+              retry_queue << {
+                  :command  => failed_test[:command],
+                  :options  => failed_test[:options],
+                  :title    => failed_test[:title]
+              }
+            end
           else
             retry_queue << {
                 :command => failed_test[:command],

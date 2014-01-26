@@ -618,7 +618,7 @@ chmod +x /tmp/reset_test_dir.sh
               if line =~ /cucumber openshift-test\/tests\/(.*\.feature):(\d+)/
                 test = $1
                 scenario = $2
-                if failed_test[:options][:retry_indivigually]
+                if failed_test[:options][:retry_individually]
                   retry_queue << build_cucumber_command(failed_test[:title], failed_test[:tags], failed_test[:options][:env],
                                                         failed_test[:timed_out]?nil:failed_test[:options][:cucumber_rerun_file],
                                                         failed_test[:options][:test_dir],
@@ -631,7 +631,7 @@ chmod +x /tmp/reset_test_dir.sh
                 end
               end
             end
-          elsif failed_test[:options][:retry_indivigually] && failed_test[:output].include?("Failure:") && failed_test[:output].include?("rake_test_loader")
+          elsif failed_test[:options][:retry_individually] && failed_test[:output].include?("Failure:") && failed_test[:output].include?("rake_test_loader")
             found_test = false
             failed_test[:output].lines.each do |line|
               if line =~ /\A(test_\w+)\((\w+Test)\) \[\/.*\/(test\/.*_test\.rb):(\d+)\]:/
@@ -720,8 +720,8 @@ chmod +x /tmp/reset_test_dir.sh
       end
     end
 
-    def build_rake_command(title="", cmd="", env = {}, retry_indivigually=true)
-      {:command => wrap_test_command(cmd, env), :options => {:retry_indivigually => retry_indivigually, :timeout => @@SSH_TIMEOUT, :env => env}, :title => title}
+    def build_rake_command(title="", cmd="", env = {}, retry_individually=true)
+      {:command => wrap_test_command(cmd, env), :options => {:retry_individually => retry_individually, :timeout => @@SSH_TIMEOUT, :env => env}, :title => title}
     end
 
     def wrap_test_command(command, env={})

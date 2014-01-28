@@ -331,7 +331,7 @@ module OpenShift
     end
 
     def get_private_ip(hostname, ssh_user="root")
-      private_ip = ssh(hostname, "facter ipaddress", 60, false, 1, ssh_user)
+      private_ip = ssh(hostname, "facter ec2_local_ipv4", 60, false, 1, ssh_user)
       if !private_ip or private_ip.strip.empty?
         puts "EXITING - AMZ instance didn't return ipaddress fact"
         exit 0

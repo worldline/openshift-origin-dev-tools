@@ -88,6 +88,8 @@ DEV_TOOLS_EXT_REPO = DEV_TOOLS_REPO
 ADDTL_SIBLING_REPOS = SIBLING_REPOS_GIT_URL.keys - [DEV_TOOLS_REPO]
 ACCEPT_DEVENV_SCRIPT = 'true'
 $amz_options = {:key_name => KEY_PAIR, :instance_type => TYPE}
+DOCKER_IMG_PACKAGES = []
+DOCKER_PACKAGE_TO_IMG_MAP = {}
 
 def guess_os(base_os=nil)
   return base_os unless base_os.nil?

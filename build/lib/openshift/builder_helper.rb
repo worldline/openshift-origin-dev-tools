@@ -49,6 +49,9 @@ module OpenShift
         tito_cmd = "tito build --rpm --test"
       end
 
+      docker_only_packages = get_docker_only_packages
+      docker_packages = get_docker_packages
+
       inside(File.expand_path("#{build_dir}", File.dirname(File.dirname(File.dirname(File.dirname(__FILE__)))))) do
         # Build and install the RPM's locally
         unless run(tito_cmd, :verbose => options.verbose?)
@@ -81,27 +84,97 @@ module OpenShift
             end
           end
         end
+        
         Dir.glob('/tmp/tito/x86_64/*.rpm').each {|file|
           FileUtils.mkdir_p "/tmp/tito/noarch/"
           FileUtils.mv file, "/tmp/tito/noarch/"
         }
-        unless run("rpm -Uvh --force /tmp/tito/noarch/*.rpm", :verbose => options.verbose?)
-          unless run("rpm -e --justdb --nodeps #{package_name}; yum install -y /tmp/tito/noarch/*.rpm", :verbose => options.verbose?)
-            FileUtils.rm_rf '/tmp/devenv/sync/'
-            exit 1
-          end
+
+        if docker_packages.include? package_name
+          FileUtils.rm_rf "/tmp/tito_docker/#{package_name}/"
+          FileUtils.mkdir_p "/tmp/tito_docker/#{package_name}/"
+          Dir.glob('/tmp/tito/noarch/*.rpm').each {|file|
+            FileUtils.cp file, "/tmp/tito_docker/#{package_name}/"
+          }
         end
-        if build_dir =~ /\/cartridges\/openshift-origin-cartridge-(.*)/ || build_dir =~ /\/cartridges\/(.*)/
-          short_cart_name = $1
-          cart_install_dir = "/usr/libexec/openshift/cartridges/#{short_cart_name}"
-          if File.exists? cart_install_dir
-            unless run("oo-admin-cartridge --action install --source #{cart_install_dir}", :verbose => options.verbose?)
+
+        unless docker_only_packages.include? package_name
+          unless run("rpm -Uvh --force /tmp/tito/noarch/*.rpm", :verbose => options.verbose?)
+            unless run("rpm -e --justdb --nodeps #{package_name}; yum install -y /tmp/tito/noarch/*.rpm --skip-broken", :verbose => options.verbose?)
               FileUtils.rm_rf '/tmp/devenv/sync/'
               exit 1
             end
           end
+          if build_dir =~ /\/cartridges\/openshift-origin-cartridge-(.*)/ || build_dir =~ /\/cartridges\/(.*)/
+            short_cart_name = $1
+            cart_install_dir = "/usr/libexec/openshift/cartridges/#{short_cart_name}"
+            if File.exists? cart_install_dir
+              unless run("oo-admin-cartridge --action install --source #{cart_install_dir}", :verbose => options.verbose?)
+                FileUtils.rm_rf '/tmp/devenv/sync/'
+                exit 1
+              end
+            end
+          end
+        end
+
+        if docker_packages.include?(package_name) and !options.include_stale
+          install_built_package_in_containers package_name
         end
       end
+    end
+
+    def install_all_built_packages_in_containers
+      Dir.glob('/tmp/tito_docker/*').each {|folder|
+        install_built_package_in_containers File.basename(folder) 
+      }
+    end
+
+    def install_built_package_in_containers(package_name)
+      images_for_package(package_name).each do |image_name|
+        puts "Installing #{package_name} into image #{image_name}..."
+        cmd = "rpm -Uvh --force /tmp/tito_docker/#{package_name}/*.rpm || (rpm -e --justdb --nodeps #{package_name}; yum install -y /tmp/tito_docker/#{package_name}/*.rpm --skip-broken)"
+        cidfile = "/tmp/tito/update_container.cid"
+        run("docker run --cidfile #{cidfile} -i -t -v /tmp/tito_docker:/tmp/tito_docker #{image_name}:latest /bin/bash -c \"#{cmd}\"")
+        update_container_id = `cat #{cidfile}`
+        run("docker commit --run='{\"Cmd\": [\"#{image_name}-startup.sh\"]}' #{update_container_id} #{image_name}")
+        run("docker rm #{update_container_id}")
+        run("rm -f #{cidfile}")
+      end
+    end
+
+    def reset_all_images_to_baseline
+      DOCKER_PACKAGE_TO_IMG_MAP.values.uniq.each do |image_name|
+        reset_image_to_baseline image_name
+      end
+    end
+
+    def reset_image_to_baseline(image_name)
+      remove_containers_for_image image_name
+      run("docker rmi #{image_name}:latest")
+      run("docker tag #{image_name}:baseline #{image_name}:latest")
+    end
+
+    def remove_containers_for_image(image_name)
+      # If it's a service, attempt to stop it to clean up any pid and cid files
+      if run("service #{image_name} status")
+        run("service #{image_name} stop")
+      end
+      # Forcefully kill any others that might be running
+      if run("docker ps | grep #{image_name}")
+        run("docker kill $(docker ps | grep #{image_name} | awk '{print $1}' | tr '\n' ' ')")
+      end
+      # Remove the containers
+      if run("docker ps -a | grep #{image_name}")
+        run("docker rm $(docker ps -a | grep #{image_name} | awk '{print $1}' | tr '\n' ' ')")
+      end
+    end
+
+    def images_for_package(package_name)
+      images = []
+      `repoquery --whatrequires --recursive --repoid devenv --qf "%{name}" #{package_name}`.each_line do |pckg|
+        images << DOCKER_PACKAGE_TO_IMG_MAP[pckg.strip] unless DOCKER_PACKAGE_TO_IMG_MAP[pckg.strip].nil?
+      end
+      images.uniq
     end
 
     def update_remote_tests(hostname, branch=nil, repo_parent_dir="/root", user="root")
@@ -228,6 +301,7 @@ sudo bash -c \"mkdir -p /tmp/rhc/junit\"
       required_packages_str = ""
       packages = get_sorted_package_names.split(' ')
       ignore_packages = get_ignore_packages
+      docker_only_packages = get_docker_only_packages
 
       SIBLING_REPOS.each do |repo_name, repo_dirs|
         repo_dirs.each do |repo_dir|
@@ -248,6 +322,59 @@ sudo bash -c \"mkdir -p /tmp/rhc/junit\"
         end
       end
       required_packages_str
+    end
+
+    def get_docker_image_required_packages(image_name)
+      required_packages_str = ""
+      packages = get_sorted_package_names.split(' ')
+      ignore_packages = get_ignore_packages
+
+      SIBLING_REPOS.each do |repo_name, repo_dirs|
+        repo_dirs.each do |repo_dir|
+          exists = File.exists?(repo_dir)
+          inside(repo_dir) do
+            spec_file_list = `find -name *.spec`.split("\n")
+            spec_file_list.each do |spec_file|
+              package = Package.new(spec_file, File.dirname(spec_file))
+              package_name = package.name
+              unless ignore_packages.include?(package.name)
+                if DOCKER_PACKAGE_TO_IMG_MAP[package.name] == image_name
+                  required_packages = package.requires
+                  required_packages.each do |r_package|
+                    required_packages_str += " \\\"#{r_package.yum_name_with_version}\\\"" unless packages.include?(r_package.name)
+                  end
+                end
+              end
+            end
+          end if exists
+        end
+      end
+      required_packages_str
+    end
+
+    def install_required_packages_into_images(options)
+      options.verbose? ? log.level = Logger::DEBUG : log.level = Logger::ERROR
+      DOCKER_PACKAGE_TO_IMG_MAP.values.uniq.each do |image_name|
+        packages = get_docker_image_required_packages image_name
+        packages.gsub!(">= %{rubyabi}", "")
+        if guess_os(options.base_os) == "fedora-19"
+          packages.gsub!("ruby193-", "")
+        end
+
+        cmd = "\"yum install -y --skip-broken --exclude=\\\"java-1.7.0-openjdk-*\\\" --exclude=\\\"java-1.6.0-openjdk-*\\\" #{packages}; yum clean all\""
+        cidfile = "/tmp/req_pkg_update_container.cid"
+        # Make sure the cidfile does not already exist
+        run("rm -f #{cidfile}")
+        unless run("docker run --cidfile #{cidfile} -i -t rhel65devenv /bin/bash -c #{cmd} ; docker wait $(cat #{cidfile})")
+          exit 1
+        end
+        update_container_id = `cat #{cidfile}`
+        unless run("docker commit #{update_container_id} #{image_name}-base; docker rm #{update_container_id}; rm -f #{cidfile}")
+          exit 1
+        end
+      end
+      puts "Docker images currently on the system:"
+      run("docker images")      
     end
 
     def get_sorted_package_names
@@ -280,6 +407,46 @@ sudo bash -c \"mkdir -p /tmp/rhc/junit\"
       end
 
       packages_str
+    end
+
+    def get_docker_packages
+      @docker_packages ||= begin
+        packages = get_packages
+        docker_packages = []
+        DOCKER_IMG_PACKAGES.each do |package_name|
+          docker_packages.concat get_recursive_package_requires(packages, package_name)
+        end
+        docker_packages.uniq!
+      end
+      @docker_packages
+    end
+
+    def get_recursive_package_requires(packages, package_name)
+      requires = []
+      unless IGNORE_PACKAGES.include? package_name
+        requires << package_name
+        pckg = packages[package_name]
+        package = Package.new(pckg[1], pckg[0])
+        package.requires.each do |r_package|
+          if packages.include? r_package
+            recursive = get_recursive_package_requires(packages, r_package.name)
+            requires.concat recursive
+          end
+        end
+      end
+      requires
+    end
+
+    # Only use this inside of an instance
+    def get_docker_only_packages
+      @docker_only_packages ||= begin
+        docker_only_packages = []
+        get_docker_packages.each do |package_name|
+          docker_only_packages << package_name unless run("rpm -q #{package_name} > /dev/null", :verbose => false)
+        end
+        docker_only_packages
+      end
+      @docker_only_packages
     end
 
     def temp_commit

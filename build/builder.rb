@@ -105,6 +105,8 @@ module OpenShift
         packages.gsub!("ruby193-", "")
       end
 
+      install_required_packages_into_images(options)
+
       unless run("su -c \"yum install -y --skip-broken --exclude=\\\"java-1.7.0-openjdk-*\\\" --exclude=\\\"java-1.6.0-openjdk-*\\\" #{packages} 2>&1\"")
         exit 1
       end
@@ -130,6 +132,7 @@ module OpenShift
     method_option :install_from_source, :type => :boolean, :desc => "Indicates whether to build based off origin/master"
     method_option :install_from_local_source, :type => :boolean, :desc => "Indicates whether to build based on your local source"
     method_option :install_required_packages, :type => :boolean, :desc => "Create an instance with all the packages required by OpenShift"
+    method_option :install_required_packages_from_local_source, :type => :boolean, :desc => "Create an instance based on your local source with all the packages required by OpenShift"    
     method_option :skip_verify, :type => :boolean, :desc => "Skip running tests to verify the build"
     method_option :instance_type, :required => false, :desc => "Amazon machine type override (default c1.medium)"
     method_option :extra_rpm_dir, :required => false, :dessc => "Directory containing extra rpms to be installed"
@@ -147,7 +150,7 @@ module OpenShift
       conn = connect(options.region)
 
       image = nil
-      if options.install_required_packages?
+      if options.install_required_packages? || options.install_required_packages_from_local_source?
         # Create a new builder instance
         if (options.region?nil)
           image = conn.images[AMI["us-east-1"]]
@@ -215,6 +218,8 @@ module OpenShift
             build_and_install(package_name, build_dir, spec_file, options)
           end
         end
+        reset_all_images_to_baseline
+        install_all_built_packages_in_containers
       end
       restart_services
     end

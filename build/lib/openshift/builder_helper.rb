@@ -18,7 +18,7 @@ module OpenShift
     include OpenShift::SSH
     include OpenShift::Amazon
 
-    @@SSH_TIMEOUT = 4800
+    @@SSH_TIMEOUT = 5400
     @@SSH_TIMEOUT_OVERRIDES = { "benchmark" => 172800 }
 
     # Get the hostname from a tag lookup or assume it's SSH accessible directly

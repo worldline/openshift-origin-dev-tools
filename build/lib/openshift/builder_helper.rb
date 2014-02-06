@@ -226,7 +226,7 @@ sudo bash -c \"mkdir -p /tmp/rhc/junit\"
 
     def get_required_packages
       required_packages_str = ""
-      packages = get_sorted_package_names
+      packages = get_sorted_package_names.split(' ')
       ignore_packages = get_ignore_packages
 
       SIBLING_REPOS.each do |repo_name, repo_dirs|

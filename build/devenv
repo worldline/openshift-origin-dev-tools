@@ -614,11 +614,10 @@ retries = 0
                   (1..4).each do |i|
                     test_queues[i-1] << build_cucumber_command("REST API Group #{i}", ["@broker_api#{i}"])
                   end
-                  test_queues[0] << build_rake_command("OpenShift Broker Application System", "cd openshift-test/broker; rake test:application_system_test", {}, true)
-                  test_queues[2] << build_rake_command("OpenShift Broker Cartridge System", "cd openshift-test/broker; rake test:cartridge_system_test", {}, true)
-                  test_queues[3] << build_rake_command("OpenShift Broker Domain System", "cd openshift-test/broker; rake test:domain_system_test", {}, true)
-                  test_queues[3] << build_rake_command("OpenShift Broker Functionals Ext", "cd /data/openshift-test/broker; rake test:functionals_ext")
-                  test_queues[0] << build_rake_command("OpenShift Broker OO Admin Scripts", "cd openshift-test/broker; rake test:oo_admin_scripts", {}, true)
+                  (1..2).each do |i|
+                    test_queues[i-1] << build_rake_command("OpenShift Broker Functionals Ext #{i}", "cd /data/openshift-test/broker; rake test:functionals_ext#{i}", {}, true)
+                  end
+                  test_queues[3] << build_rake_command("OpenShift Broker OO Admin Scripts", "cd openshift-test/broker; rake test:oo_admin_scripts", {}, true)
                 when 'node'
                   (1..3).each do |i|
                     test_queues[i-1] << build_cucumber_command("Extended Node Group #{i}", ["@node_extended#{i}"])
@@ -645,7 +644,9 @@ retries = 0
             unless options.exclude_broker?
               test_queues[3] << build_rake_command("OpenShift Broker Units", "cd /data/openshift-test/broker; rake test:units", {}, false)
               test_queues[0] << build_rake_command("OpenShift Broker Integration", "cd /data/openshift-test/broker; rake test:integration", {}, false)
-              test_queues[2] << build_rake_command("OpenShift Broker Functional", "cd /data/openshift-test/broker; rake test:functionals", {}, false)
+              (1..3).each do |i|
+                test_queues[i-1] << build_rake_command("OpenShift Broker Functional #{i}", "cd /data/openshift-test/broker; rake test:functionals#{i}", {}, false)
+              end
               #test_queues[1] << build_rake_command("OpenShift Admin Console Functional", "cd /data/openshift-test/broker; rake test:admin_console_functionals", {}, false)
               test_queues[3] << build_cucumber_command("Broker cucumber", ["@broker"])
             end

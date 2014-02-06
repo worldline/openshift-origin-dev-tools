@@ -647,7 +647,7 @@ chmod +x /tmp/reset_test_dir.sh
                 if failed_test[:command] =~ /\A(cd .+?; )/
                   chdir_command = $1
                 end
-                rake_retries << build_rake_command("#{class_name} (#{test_name})", "#{chdir_command} ruby -Ilib:test #{file_name} -n #{test_name}", true)
+                rake_retries << build_rake_command("#{class_name} (#{test_name})", "#{chdir_command} ruby -Ilib:test #{file_name} -n #{test_name}", failed_test[:options][:env], true)
               elsif line =~ /\A(test_\w+)\((\w+)\) \[\/.*\/(.*\.rb):(\d+)\]:/
                 found_tests = false
                 break

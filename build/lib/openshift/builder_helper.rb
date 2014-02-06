@@ -510,7 +510,7 @@ chmod +x /tmp/reset_test_dir.sh
       end
     end
 
-    def run_tests_with_retry(test_queues, hostname, ssh_user="root")
+    def run_tests_with_retry(test_queues, hostname, ssh_user="root", exit_on_fail=true)
       test_run_success = false
       (1..3).each do |retry_cnt|
         print "Test run ##{retry_cnt}\n\n\n"
@@ -523,7 +523,8 @@ chmod +x /tmp/reset_test_dir.sh
         end
         test_queues = [failure_queue]
       end
-      exit 1 unless test_run_success
+      exit 1 if exit_on_fail && !test_run_success 
+      test_run_success
     end
 
     def run_tests(test_queues, hostname, ssh_user)

@@ -544,7 +544,7 @@ chmod +x /tmp/reset_test_dir.sh
             # 255 indicates ssh timeout, we can't run it again because the rerun file will
             # be incomplete, so leave the test marked as complete but timed out.
             test[:timed_out] = exit_code == 255
-            
+
             still_running_tests = test_queues.map do |q|
               q.select{ |t| t[:completed] != true }
             end
@@ -558,12 +558,12 @@ chmod +x /tmp/reset_test_dir.sh
               end
               puts "\n\n\n"
             end
-            
+
             all_tests=[]
             test_queues.each do |q|
               all_tests += q
             end
-            
+
             timed_out_tests=all_tests.select{ |t| t[:timed_out] == true }
             unless timed_out_tests.empty?
               puts "Timed Out Tests:"
@@ -572,7 +572,7 @@ chmod +x /tmp/reset_test_dir.sh
               end
               puts "\n\n\n"
             end
-            
+
             failed_tests = all_tests.select{ |t| t[:success] == false && t[:completed] == true && t[:timed_out] != true }
             unless failed_tests.empty?
               puts "Failed Tests:"
@@ -644,7 +644,7 @@ chmod +x /tmp/reset_test_dir.sh
                 # determine if the first part of the command is a directory change
                 # if so, include that in the retry command
                 chdir_command = ""
-                if cmd =~ /\A(cd .+?; )/
+                if failed_test[:command] =~ /\A(cd .+?; )/
                   chdir_command = $1
                 end
                 rake_retries << build_rake_command("#{class_name} (#{test_name})", "#{chdir_command} ruby -Ilib:test #{file_name} -n #{test_name}", true)

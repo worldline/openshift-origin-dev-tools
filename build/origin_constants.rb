@@ -25,8 +25,8 @@ OPTIONS = {
       'rubygem-openshift-origin-container-libvirt',
       #'rubygem-openshift-origin-admin-console',
     ],
-    "cucumber_options"        => '--strict -f progress -f html -t ~@rhel-only -t ~@jboss -t ~@not-origin',
-    "broker_cucumber_options" => '--strict -f progress -f html --out /tmp/rhc/broker_cucumber.html -f progress  -t ~@rhel-only -t ~@jboss',
+    "cucumber_options"        => '--strict -f progress -f html -t ~@not-origin',
+    "broker_cucumber_options" => '--strict -f progress -f html --out /tmp/rhc/broker_cucumber.html -f progress',
   },
   "rhel"   => {
     "amis"            => {"us-east-1" =>"ami-7d0c6314"},

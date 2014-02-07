@@ -688,11 +688,7 @@ chmod +x /tmp/reset_test_dir.sh
       end
       case(BASE_OS)
         when "rhel" || "centos" then
-          tags += ["~@fedora-18-only", "~@fedora-19-only", "~@not-rhel", "~@jboss", "~@not-origin"]
-        when "fedora-19"
-          tags += ["~@fedora-18-only", "~@rhel-only", "~@not-fedora-19", "~@jboss", "~@not-origin"]
-        when "fedora-18"
-          tags += ["~@fedora-19-only", "~@rhel-only", "~@not-fedora-18", "~@jboss", "~@not-origin"]
+          tags += ["~@not-rhel", "~@not-origin"]
       end
       opts += tags.uniq.map{ |t| "-t #{t}"}
       opts << "-r #{test_dir}"

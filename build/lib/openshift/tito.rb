@@ -147,7 +147,11 @@ module OpenShift
       def build_requires
         @build_requires ||= spec_file.lines.to_a.inject([]) do |a,s|
           match = s.match(/^\s*BuildRequires:\s*(.+)$/)
-          a << Require.new(replace_globals(match[1].gsub('?scl:%scl_prefix', 'scl_prefix'))) if match
+          if match
+            replace_globals(match[1].gsub('?scl:%scl_prefix', 'scl_prefix')).split(' ').each do |req|
+              a << Require.new(req)
+            end
+          end
           a
         end
       end
@@ -155,7 +159,11 @@ module OpenShift
       def requires
         @requires ||= spec_file.lines.to_a.inject([]) do |a,s|
           match = s.match(/^\s*Requires:\s*(.+)$/)
-          a << Require.new(replace_globals(match[1].gsub('?scl:%scl_prefix', 'scl_prefix'))) if match
+          if match
+            replace_globals(match[1].gsub('?scl:%scl_prefix', 'scl_prefix')).split(' ').each do |req|
+              a << Require.new(req)
+            end
+          end
           a
         end
       end

@@ -24,7 +24,7 @@ module OpenShift
 
     desc "find_and_build_specs", "Builds all non ignored specs in the current directory", :hide => true
     method_option :base_os, :default => nil, :desc => "Operating system for Origin (fedora or rhel)"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def find_and_build_specs
       def_constants(guess_os(options.base_os))
 
@@ -94,7 +94,7 @@ module OpenShift
     desc "install_required_packages", "Install the packages required, as specified in the spec files"
     method_option :base_os, :default => nil, :desc => "Operating system for Origin (fedora or rhel)"
     method_option :verbose, :type => :boolean, :desc => "Enable verbose logging"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def install_required_packages
       def_constants(guess_os(options.base_os))
 
@@ -134,7 +134,7 @@ module OpenShift
     method_option :instance_type, :required => false, :desc => "Amazon machine type override (default c1.medium)"
     method_option :extra_rpm_dir, :required => false, :dessc => "Directory containing extra rpms to be installed"
     method_option :disable_selinux, :required => false, :default => false, :type => :boolean, :dessc => "Directory containing extra rpms to be installed"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     method_option :download_devenv_repo, :type => :string, :desc => "If specified, the resulting devenv's RPM repo will be downloaded to the specified directory"
     def build(name, build_num)
       options.verbose? ? log.level = Logger::DEBUG : log.level = Logger::ERROR
@@ -175,7 +175,7 @@ module OpenShift
     method_option :include_stale, :type => :boolean, :desc => "Include packages that have been tagged but not synced to the repo"
     method_option :verbose, :type => :boolean, :desc => "Enable verbose logging"
     method_option :retry_failure_with_tag, :type => :boolean, :default=>true, :desc => "If a package fails to build, tag it and retry the build."
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def update
       def_constants(guess_os())
 
@@ -226,7 +226,7 @@ module OpenShift
     method_option :skip_build, :type => :boolean, :desc => "Indicator to skip the rpm build/install"
     method_option :clean_metadata, :type => :boolean, :desc => "Cleans metadata before running yum commands"
     method_option :region, :required => false, :desc => "Amazon region override (default us-east-1)"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def sync(name)
       def_constants(guess_os(options.base_os))
 
@@ -239,7 +239,7 @@ module OpenShift
     method_option :download_artifacts, :type => :boolean, :desc => "Download artifacts before terminating"    
     method_option :verbose, :type => :boolean, :desc => "Enable verbose logging"
     method_option :region, :required => false, :desc => "Amazon region override (default us-east-1)"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def terminate(tag)
       def_constants(guess_os(options.base_os))
       options.verbose? ? log.level = Logger::DEBUG : log.level = Logger::ERROR
@@ -271,7 +271,7 @@ module OpenShift
     method_option :instance_type, :required => false, :desc => "Amazon machine type override (default '#{TYPE}')"
     method_option :region, :required => false, :desc => "Amazon region override (default us-east-1)"
     method_option :image_name, :required => false, :desc => "AMI ID or DEVENV name to launch"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def launch(name)
       options.verbose? ? log.level = Logger::DEBUG : log.level = Logger::ERROR
       def_constants(guess_os(options.base_os))
@@ -349,7 +349,7 @@ module OpenShift
     method_option :base_os, :default => nil, :desc => "Operating system for Origin (fedora or rhel)"
     method_option :verbose, :type => :boolean, :desc => "Enable verbose logging"
     method_option :region, :required => false, :desc => "Amazon region override (default us-east-1)"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def sanity_check(tag)
       options.verbose? ? log.level = Logger::DEBUG : log.level = Logger::ERROR
       def_constants(guess_os(options.base_os))
@@ -364,7 +364,7 @@ module OpenShift
 
     desc "print_hostname", "Print the hostname of a tagged instance"
     method_option :region, :required => false, :desc => "Amazon region override (default us-east-1)"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def print_hostname(tag)
       log.level = Logger::ERROR
       conn = connect(options.region)

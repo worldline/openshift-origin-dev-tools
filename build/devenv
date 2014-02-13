@@ -24,7 +24,7 @@ module Origin
 
     desc "docs", "Build OpenShift Origin Ruby documentation"
     method_option :verbose, :type => :boolean, :default => true, :desc => "Enable verbose logging"
-    method_option :ssh_user, :type => :string, :default => "fedora", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "fedora", :desc => "User to use when ssh'ing to build machine"
     method_option :terminate, :type => :boolean, :desc => "Terminate the instance when finished"
     # Task to build YARD documentation for all Ruby Code
     #
@@ -132,7 +132,7 @@ popd
     method_option :exclude_cartridge, :type => :boolean, :desc => "Exclude cartridge tests"
     method_option :exclude_rhc, :type => :boolean, :desc => "Exclude rhc tests"
     method_option :include_extended, :required => false, :desc => "Include extended tests"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def build_vm(hostname)
       options.verbose? ? log.level = Logger::DEBUG : log.level = Logger::ERROR
       def_constants(guess_os("fedora-19"))
@@ -174,7 +174,7 @@ popd
     desc "restart_services hostname", "Restarts all services on the host"
     method_option :base_os, :default => nil, :desc => "Operating system for Origin (fedora or rhel)"
     method_option :verbose, :type => :boolean, :desc => "Enable verbose logging"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def restart_services(hostname=:local)
       options.verbose? ? log.level = Logger::DEBUG : log.level = Logger::ERROR
       def_constants(guess_os(options.base_os))
@@ -198,7 +198,7 @@ popd
     method_option :disable_charlie, :type => :boolean, :desc=> "Disable idle shutdown timer on dev instance (charlie)"
     method_option :mcollective_logs, :type => :boolean, :desc=> "Don't allow mcollective logs to be deleted on rotation"
     method_option :profile_broker, :type => :boolean, :desc=> "Enable profiling code on broker"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def test_vm(hostname)
       options.verbose? ? log.level = Logger::DEBUG : log.level = Logger::ERROR
       def_constants(guess_os(options.base_os))
@@ -214,7 +214,7 @@ popd
     method_option :update_packages, :type => :boolean, :desc => "Run yum update before install?"
     method_option :incremental, :type => :boolean, :desc => "Build only the changed packages"
     method_option :install, :type => :boolean, :default => false, :desc => "Install all packages that were built"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def local_build
       options.verbose? ? log.level = Logger::DEBUG : log.level = Logger::ERROR
       def_constants(guess_os(options.base_os))
@@ -275,7 +275,7 @@ retries = 0
     desc "release_build", "Creates release packages"
     method_option :verbose, :type => :boolean, :default => true, :desc => "Enable verbose logging"    
     method_option :base_os, :default => nil, :desc => "Operating system for Origin (fedora or rhel)"
-    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build maching"
+    method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def release_build
       options.verbose? ? log.level = Logger::DEBUG : log.level = Logger::ERROR
       def_constants(guess_os(options.base_os))

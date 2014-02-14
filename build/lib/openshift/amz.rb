@@ -484,7 +484,7 @@ module OpenShift
         end
       end
     end
-    
+
     def tag_to_terminate(i)
       if !i.tags["Name"] || !i.tags["Name"].end_with?('-terminate')
         log.info "Tagging instance to terminate #{i.id} (#{i.tags["Name"]})"

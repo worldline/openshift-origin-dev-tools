@@ -380,7 +380,7 @@ module OpenShift
     end
 
     desc "clone_addtl_repos BRANCH", "Clones any additional repos not including this repo and any other repos that extend these dev tools"
-    method_option :replace, :type => :boolean, :desc => "Replace the addtl repos if the already exist"
+    method_option :replace, :type => :boolean, :desc => "Replace the additional repos if the already exist"
     def clone_addtl_repos(branch)
       git_clone_commands = "set -e\n "
 

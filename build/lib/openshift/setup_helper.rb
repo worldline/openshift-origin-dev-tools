@@ -36,7 +36,7 @@ module SetupHelper
       end
     end
   end
-  
+
   # Ensure that openshift mirror repository and all build requirements are installed.
   # On RHEL6, it also verifies that the build script is running within SCL-Ruby 1.9.3.
   def self.ensure_build_requirements
@@ -47,30 +47,30 @@ module SetupHelper
         puts packages.map{|p| "\t#{p}"}.join("\n")
         system "yum install -y #{packages.join(" ")}"
       end
-      
+
       create_openshift_deps_rpm_repository
       if `rpm -q puppet`.match(/is not installed/)
         system "yum install -y --enablerepo puppetlabs-products facter puppet"
       end
-      
+
       base_os = guess_os
       if(base_os == "rhel" or base_os == "centos")
         system "yum install -y scl-utils ruby193 ruby193-rubygem-cucumber"
       end
     end
-    
+
     missing_gems = {}
     BUILD_GEM_REQUIREMENTS.each do |gem_name, version|
       missing_gems[gem_name]=version unless is_gem_installed?(base_os, gem_name, version)
     end
-    
+
     if missing_gems.keys.length > 0
       print "Installing required gems\n"
       missing_gems.each do |gem_name, version|
         install_gem(base_os, gem_name, version, File.exist?("/etc/redhat-release"))
       end
     end
-    
+
     if RUBY_VERSION.to_f < 1.9
       if(guess_os == "rhel" or guess_os == "centos")
         puts "Unsupported ruby version #{RUBY_VERSION}. Please ensure that you are running within a ruby193 scl container\n"

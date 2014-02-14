@@ -567,7 +567,7 @@ chmod +x /tmp/reset_test_dir.sh
             timed_out_tests=all_tests.select{ |t| t[:timed_out] == true }
             unless timed_out_tests.empty?
               puts "Timed Out Tests:"
-              timed_out_tests.each do |t|                
+              timed_out_tests.each do |t|
                 print "\t#{t[:title]}\n" 
               end
               puts "\n\n\n"
@@ -576,7 +576,7 @@ chmod +x /tmp/reset_test_dir.sh
             failed_tests = all_tests.select{ |t| t[:success] == false && t[:completed] == true && t[:timed_out] != true }
             unless failed_tests.empty?
               puts "Failed Tests:"
-              failed_tests.each do |t|                
+              failed_tests.each do |t|
                 print "\t#{t[:title]}\n" 
               end
               puts "\n\n\n"
@@ -585,7 +585,7 @@ chmod +x /tmp/reset_test_dir.sh
             passed_tests = all_tests.select{ |t| t[:success] == true && t[:completed] == true }
             unless passed_tests.empty?
               puts "Passed Tests:"
-              passed_tests.each do |t|                
+              passed_tests.each do |t|
                 print "\t#{t[:title]}\n" 
               end
               puts "\n\n\n"

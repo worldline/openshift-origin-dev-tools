@@ -52,7 +52,7 @@ OPTIONS = {
   },
 }
 
-TYPE = "m1.large"
+TYPE = "m3.large"
 ZONE = 'us-east-1d'
 VERIFIER_REGEXS = {}
 TERMINATE_REGEX = /terminate/

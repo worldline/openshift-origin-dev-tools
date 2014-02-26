@@ -1026,6 +1026,8 @@ EOF
           end
           puts "Done"
 
+          update_remote_tests(hostname, options.branch, "/data", options.ssh_user) unless options.install_required_packages?
+
           image_id = nil
           if options[:register] and not conn.nil?
             # reset the eth0 network config to remove the HWADDR
@@ -1040,7 +1042,6 @@ EOF
 
           if options.install_from_source? || options.install_from_local_source?
             post_launch_setup(hostname, options)
-            update_remote_tests(hostname, options.branch, "/data", options.ssh_user)
           end
 
           unless options.skip_verify? || options.install_required_packages?

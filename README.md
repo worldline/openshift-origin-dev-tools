@@ -30,7 +30,6 @@ The tools can be invoked using [/build/devenv](https://github.com/openshift/orig
 		  [--exclude-node]                         # Exclude node tests
 		  [--exclude-site]                         # Exclude site tests
 		  [--exclude-rhc]                          # Exclude rhc tests
-		  [--include-web]                          # Include running Selenium tests
 		  [--include-coverage]                     # Include coverage analysis on unit tests
 		  [--include-extended=INCLUDE_EXTENDED]    # Include extended tests
 		  [--base-image-filter=BASE_IMAGE_FILTER]  # Filter for the base image to use EX: devenv-base_*
@@ -91,7 +90,6 @@ The tools can be invoked using [/build/devenv](https://github.com/openshift/orig
 		  [--disable-charlie]                    # Disable idle shutdown timer on dev instance (charlie)
 		  [--mcollective-logs]                   # Don't allow mcollective logs to be deleted on rotation
 		  [--profile-broker]                     # Enable profiling code on broker
-		  [--include-web]                        # Include running Selenium tests
 		  [--region=REGION]                      # Amazon region override (default us-east-1)
 
   * ./build/devenv sync [NAME]

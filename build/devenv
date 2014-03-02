@@ -737,7 +737,7 @@ retries = 0
       end
 
       def sync_impl(name, options)
-        # Get the hostname from a tag lookup or assume it's SSH accessible directly
+        # Get the hostname from a tag lookup or assume its SSH accessible directly
         hostname = get_host_by_name_or_tag(name, options, options.ssh_user)
 
         clone_commands, working_dirs = sync_available_sibling_repos(hostname, "/data", options.ssh_user)

@@ -21,7 +21,7 @@ module OpenShift
     @@SSH_TIMEOUT = 5400
     @@SSH_TIMEOUT_OVERRIDES = { "benchmark" => 172800 }
 
-    # Get the hostname from a tag lookup or assume it's SSH accessible directly
+    # Get the hostname from a tag lookup or assume its SSH accessible directly
     # Only look for a tag if the --tag option is specified
     def get_host_by_name_or_tag(name, options=nil, user="root")
       return name unless options && options.tag?

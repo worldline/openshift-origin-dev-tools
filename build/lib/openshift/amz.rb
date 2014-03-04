@@ -161,12 +161,16 @@ module OpenShift
       # which the given name is a prefix, and suggest these instances.
       if use_tag
         instances = conn.instances.filter('tag-key', 'Name').filter('tag-value', "#{name}*")
-        if instances.any?
+        addtl_instances = []
+        instances.each do |i|
+          if (instance_status(i) != :terminated)
+            addtl_instances << i
+          end
+        end
+        if addtl_instances.any?
           puts "Did you mean one of the following?"
-          instances.each do |i|
-            if (instance_status(i) != :terminated)
-              puts "  #{i.tags["Name"]} - #{i.id}"
-            end
+          addtl_instances.each do |i|
+            puts "  #{i.tags["Name"]} - #{i.id}"
           end
         end
       end
@@ -180,12 +184,16 @@ module OpenShift
       else
         instances = conn.instances.filter('dns-name', name)
       end
-      if instances.any?
+      addtl_instances = []
+      instances.each do |i|
+        if (instance_status(i) != :terminated)
+          addtl_instances << i
+        end
+      end
+      if addtl_instances.any? && !silent
         puts "Found instances with same name:"
-        instances.each do |i|
-          if (instance_status(i) != :terminated)
-            puts "  #{i.tags["Name"]} - #{i.id}" unless silent
-          end
+        addtl_instances.each do |i|
+          puts "  #{i.tags["Name"]} - #{i.id}"
         end
       end
     end

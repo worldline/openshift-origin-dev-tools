@@ -623,7 +623,7 @@ retries = 0
                     test_queues[i-1] << build_cucumber_command("Extended Node Group #{i}", ["@node_extended#{i}"])
                   end
                 when 'cartridge'
-                  (1..3).each do |i|
+                  (1..4).each do |i|
                     test_queues[i-1] << build_cucumber_command("Extended Cartridge Group #{i}", ["@cartridge_extended#{i}"])
                   end
                 when 'gear'

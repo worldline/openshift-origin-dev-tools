@@ -150,7 +150,7 @@ module OpenShift
       end
       instances.each do |i|
         if (instance_status(i) != :terminated)
-          puts "Found instance will be terminated: #{i.id} (#{i.tags["Name"]})" unless silent
+          puts "Found instance: #{i.id} (#{i.tags["Name"]})" unless silent
           block_until_available(i, ssh_user) if block_until_available
           return i
         end

@@ -299,9 +299,8 @@ sudo bash -c \"mkdir -p /tmp/rhc/junit\"
 
     def get_required_packages
       required_packages_str = ""
-      packages = get_sorted_package_names.split(' ')
-      ignore_packages = get_ignore_packages
-      docker_only_packages = get_docker_only_packages
+      package_names = get_sorted_package_names.split(' ')
+      ignore_package_names = get_ignore_packages
 
       SIBLING_REPOS.each do |repo_name, repo_dirs|
         repo_dirs.each do |repo_dir|
@@ -311,10 +310,10 @@ sudo bash -c \"mkdir -p /tmp/rhc/junit\"
             spec_file_list.each do |spec_file|
               package = Package.new(spec_file, File.dirname(spec_file))
               package_name = package.name
-              unless ignore_packages.include?(package.name)
+              unless ignore_package_names.include?(package.name)
                 required_packages = package.build_requires + package.requires
                 required_packages.each do |r_package|
-                  required_packages_str += " \\\"#{r_package.yum_name_with_version}\\\"" unless packages.include?(r_package.name)
+                  required_packages_str += " \\\"#{r_package.yum_name_with_version}\\\"" unless package_names.include?(r_package.name)
                 end
               end
             end
@@ -325,10 +324,10 @@ sudo bash -c \"mkdir -p /tmp/rhc/junit\"
     end
 
     def get_docker_image_required_packages(image_name)
-      required_packages_str = ""
-      packages = get_sorted_package_names.split(' ')
-      ignore_packages = get_ignore_packages
-
+      rps = ''
+      package_names = get_sorted_package_names.split(' ')
+      ignore_package_names = get_ignore_packages
+      packages = {}
       SIBLING_REPOS.each do |repo_name, repo_dirs|
         repo_dirs.each do |repo_dir|
           exists = File.exists?(repo_dir)
@@ -336,20 +335,32 @@ sudo bash -c \"mkdir -p /tmp/rhc/junit\"
             spec_file_list = `find -name *.spec`.split("\n")
             spec_file_list.each do |spec_file|
               package = Package.new(spec_file, File.dirname(spec_file))
-              package_name = package.name
-              unless ignore_packages.include?(package.name)
-                if DOCKER_PACKAGE_TO_IMG_MAP[package.name] == image_name
-                  required_packages = package.requires
-                  required_packages.each do |r_package|
-                    required_packages_str += " \\\"#{r_package.yum_name_with_version}\\\"" unless packages.include?(r_package.name)
-                  end
-                end
+              unless ignore_package_names.include?(package.name)
+                packages[package.name] = package
               end
             end
           end if exists
         end
       end
-      required_packages_str
+      packages.each do |package_name, package|
+        if (DOCKER_PACKAGE_TO_IMG_MAP[package_name] == image_name)
+          rps += required_packages_str(package, package_names, packages)
+        end
+      end
+      rps
+    end
+
+    def required_packages_str(package, package_names, packages)
+      rps = ''
+      required_packages = package.requires
+      required_packages.each do |r_package|
+        if package_names.include?(r_package.name)
+          rps += required_packages_str(packages[r_package.name], package_names, packages) if packages[r_package.name]
+        else
+          rps += " \\\"#{r_package.yum_name_with_version}\\\""
+        end
+      end
+      rps
     end
 
     def install_required_packages_into_images(options)
@@ -374,7 +385,7 @@ sudo bash -c \"mkdir -p /tmp/rhc/junit\"
         end
       end
       puts "Docker images currently on the system:"
-      run("docker images")      
+      run("docker images")
     end
 
     def get_sorted_package_names

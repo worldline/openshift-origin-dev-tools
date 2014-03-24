@@ -84,7 +84,7 @@ module OpenShift
             end
           end
         end
-        
+
         Dir.glob('/tmp/tito/x86_64/*.rpm').each {|file|
           FileUtils.mkdir_p "/tmp/tito/noarch/"
           FileUtils.mv file, "/tmp/tito/noarch/"

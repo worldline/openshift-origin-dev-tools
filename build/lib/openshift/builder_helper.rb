@@ -134,11 +134,12 @@ module OpenShift
         puts "Installing #{package_name} into image #{image_name}..."
         cmd = "rpm -Uvh --force /tmp/tito_docker/#{package_name}/*.rpm || (rpm -e --justdb --nodeps #{package_name}; yum install -y /tmp/tito_docker/#{package_name}/*.rpm --skip-broken)"
         cidfile = "/tmp/tito/update_container.cid"
-        run("docker run --cidfile #{cidfile} -i -t -v /tmp/tito_docker:/tmp/tito_docker #{image_name}:latest /bin/bash -c \"#{cmd}\"")
+        result = run("docker run --cidfile #{cidfile} -i -t -v /tmp/tito_docker:/tmp/tito_docker #{image_name}:latest /bin/bash -c \"#{cmd}\"")
         update_container_id = `cat #{cidfile}`
-        run("docker commit --run='{\"Cmd\": [\"#{image_name}-startup.sh\"]}' #{update_container_id} #{image_name}")
+        run("docker commit --run='{\"Cmd\": [\"#{image_name}-startup.sh\"]}' #{update_container_id} #{image_name}") if result
         run("docker rm #{update_container_id}")
         run("rm -f #{cidfile}")
+        exit 1 unless result
       end
     end
 

@@ -116,19 +116,48 @@ module OpenShift
             end
           end
         end
-
-        if docker_packages.include?(package_name) and !options.include_stale
-          install_built_package_in_containers package_name
-        end
       end
     end
 
     def install_all_built_packages_in_containers
+      packages = []
       Dir.glob('/tmp/tito_docker/*').each {|folder|
-        install_built_package_in_containers File.basename(folder) 
+        packages << File.basename(folder) 
       }
+      install_built_packages_in_containers packages
     end
 
+    def install_built_packages_in_containers(built_packages)
+      docker_packages = get_docker_packages
+      image_packages = {}
+
+      built_packages.each do |package_name|
+        if docker_packages.include?(package_name)
+          images_for_package(package_name).each do |image_name|
+            image_packages[image_name] ||= []
+            image_packages[image_name] << package_name
+          end
+        end
+      end
+
+      image_packages.each do |image_name,packages|
+        puts "Installing #{packages.join(", ")} into image #{image_name}..."
+        cmd = ""
+        packages.each do |package_name|
+          cmd += "rpm -Uvh --force /tmp/tito_docker/#{package_name}/*.rpm || (rpm -e --justdb --nodeps #{package_name}; yum install -y /tmp/tito_docker/#{package_name}/*.rpm --skip-broken); "
+        end
+        cidfile = "/tmp/tito/update_container.cid"
+        result = run("docker run --cidfile #{cidfile} -i -t -v /tmp/tito_docker:/tmp/tito_docker #{image_name}:latest /bin/bash -c \"#{cmd}\"")
+        update_container_id = `cat #{cidfile}`
+        run("docker commit --run='{\"Cmd\": [\"#{image_name}-startup.sh\"]}' #{update_container_id} #{image_name}") if result
+        run("docker rm #{update_container_id}")
+        run("rm -f #{cidfile}")
+        exit 1 unless result
+      end
+    end
+
+    # Avoid using this when possible in favor of install_build_packages_in_containers
+    # to reduce the number of docker commits
     def install_built_package_in_containers(package_name)
       images_for_package(package_name).each do |image_name|
         puts "Installing #{package_name} into image #{image_name}..."

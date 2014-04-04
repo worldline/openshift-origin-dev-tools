@@ -191,6 +191,8 @@ module OpenShift
       sync_dirs = get_sync_dirs
       sync_dirs = sync_dirs.sort_by{ |sync_dir| sync_dir[0] }.reverse
 
+      built_packages = []
+
       sync_dirs.each do |sync_dir|
         package_name = sync_dir[0]
         build_dir = sync_dir[1]
@@ -201,6 +203,7 @@ module OpenShift
           return
         else
           build_and_install(package_name, build_dir, spec_file, options)
+          built_packages << package_name
         end
       end
 
@@ -220,6 +223,8 @@ module OpenShift
         end
         reset_all_images_to_baseline
         install_all_built_packages_in_containers
+      else
+        install_built_packages_in_containers built_packages
       end
       restart_services
     end

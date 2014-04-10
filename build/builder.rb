@@ -287,6 +287,12 @@ module OpenShift
     method_option :ssh_user, :type => :string, :default => "root", :desc => "User to use when ssh'ing to build machine"
     def launch(name)
       options.verbose? ? log.level = Logger::DEBUG : log.level = Logger::ERROR
+
+      if name == '--help' || name == '-h'
+        puts "Try: build/devenv --help launch"
+        exit 255
+      end
+
       def_constants(guess_os(options.base_os))
       ami = choose_ami_for_launch(options)
 

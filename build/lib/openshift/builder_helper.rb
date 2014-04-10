@@ -99,11 +99,9 @@ module OpenShift
         end
 
         unless docker_only_packages.include? package_name
-          unless run("rpm -Uvh --force /tmp/tito/noarch/*.rpm", :verbose => options.verbose?)
-            unless run("rpm -e --justdb --nodeps #{package_name}; yum install -y /tmp/tito/noarch/*.rpm --skip-broken", :verbose => options.verbose?)
-              FileUtils.rm_rf '/tmp/devenv/sync/'
-              exit 1
-            end
+          unless run("rpm -Uvh --force /tmp/tito/noarch/*.rpm || yum update -y /tmp/tito/noarch/*.rpm --skip-broken || yum install -y /tmp/tito/noarch/*.rpm --skip-broken", :verbose => options.verbose?)
+            FileUtils.rm_rf '/tmp/devenv/sync/'
+            exit 1
           end
           if build_dir =~ /\/cartridges\/openshift-origin-cartridge-(.*)/ || build_dir =~ /\/cartridges\/(.*)/
             short_cart_name = $1
@@ -144,7 +142,7 @@ module OpenShift
         puts "Installing #{packages.join(", ")} into image #{image_name}..."
         cmd = ""
         packages.each do |package_name|
-          cmd += "rpm -Uvh --force /tmp/tito_docker/#{package_name}/*.rpm || (rpm -e --justdb --nodeps #{package_name}; yum install -y /tmp/tito_docker/#{package_name}/*.rpm --skip-broken); "
+          cmd += "rpm -Uvh --force /tmp/tito_docker/#{package_name}/*.rpm || yum update -y /tmp/tito_docker/#{package_name}/*.rpm --skip-broken || yum install -y /tmp/tito_docker/#{package_name}/*.rpm --skip-broken; "
         end
         cidfile = "/tmp/tito/update_container.cid"
         result = run("docker run --cidfile #{cidfile} -i -t -v /tmp/tito_docker:/tmp/tito_docker #{image_name}:latest /bin/bash -c \"#{cmd}\"")
@@ -161,7 +159,7 @@ module OpenShift
     def install_built_package_in_containers(package_name)
       images_for_package(package_name).each do |image_name|
         puts "Installing #{package_name} into image #{image_name}..."
-        cmd = "rpm -Uvh --force /tmp/tito_docker/#{package_name}/*.rpm || (rpm -e --justdb --nodeps #{package_name}; yum install -y /tmp/tito_docker/#{package_name}/*.rpm --skip-broken)"
+        cmd = "rpm -Uvh --force /tmp/tito_docker/#{package_name}/*.rpm || yum install -y /tmp/tito_docker/#{package_name}/*.rpm --skip-broken || yum install -y /tmp/tito_docker/#{package_name}/*.rpm --skip-broken"
         cidfile = "/tmp/tito/update_container.cid"
         result = run("docker run --cidfile #{cidfile} -i -t -v /tmp/tito_docker:/tmp/tito_docker #{image_name}:latest /bin/bash -c \"#{cmd}\"")
         update_container_id = `cat #{cidfile}`

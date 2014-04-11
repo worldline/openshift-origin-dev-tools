@@ -78,15 +78,18 @@ module OpenShift
             tito_cmd = "tito build --builder=tito.builder.GemBuilder --rpm --test"
           end
 
+          build_threads = []
           Dir.chdir(package.dir) do
-            puts "\n#{'-'*60}"
-            raise "Unable to build #{package.name}" unless system tito_cmd
-            if prereqs.include? package
-              puts "\n    Installing..."
-              #FileUtils.rm_rf "/tmp/tito/**"
-              raise "Unable to install package #{package.name}" unless system("rpm -Uvh --force /tmp/tito/noarch/#{package}*.rpm")
+            build_threads << Thread.new do
+              raise "Unable to build #{package.name}" unless system tito_cmd
+              puts "\n#{'-'*60}"
+              if prereqs.include? package
+                puts "\n    Installing..."
+                raise "Unable to install package #{package.name}" unless system("rpm -Uvh --force /tmp/tito/noarch/#{package}*.rpm")
+              end
             end
           end
+          build_threads.each {|t| t.join}
         end
       end
     end

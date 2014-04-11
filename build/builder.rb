@@ -313,7 +313,7 @@ module OpenShift
       hostname = instance.dns_name
       puts "Hostname: #{hostname}"
 
-      puts "Sleeping for #{SLEEP_AFTER_LAUNCH} seconds to let node stabilize..."
+      puts "Sleeping for #{SLEEP_AFTER_LAUNCH} seconds to let devenv stabilize..."
       sleep SLEEP_AFTER_LAUNCH
 
       update_facts_impl(hostname)

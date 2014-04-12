@@ -1,6 +1,6 @@
 # OpenShift Origin Build Tools
 
-Origin-dev-tools contains the scripts necessary for building OpenShift Origin PaaS from source. 
+Origin-dev-tools contains the scripts necessary for developing OpenShift Origin. 
 
 ## Usage
 
@@ -30,7 +30,7 @@ The tools can be invoked using [/build/devenv](https://github.com/openshift/orig
 		  [--exclude-node]                         # Exclude node tests
 		  [--exclude-site]                         # Exclude site tests
 		  [--exclude-rhc]                          # Exclude rhc tests
-		  [--include-coverage]                     # Include coverage analysis on unit tests
+		  [--exclude-cartridge]                    # Exclude cartridge tests
 		  [--include-extended=INCLUDE_EXTENDED]    # Include extended tests
 		  [--base-image-filter=BASE_IMAGE_FILTER]  # Filter for the base image to use EX: devenv-base_*
 		  [--region=REGION]                        # Amazon region override (default us-east-1)
@@ -83,8 +83,8 @@ The tools can be invoked using [/build/devenv](https://github.com/openshift/orig
 		  [--exclude-node]                       # Exclude node tests
 		  [--exclude-site]                       # Exclude site tests
 		  [--exclude-rhc]                        # Exclude rhc tests
+		  [--exclude-cartridge]                  # Exclude cartridge tests
 		  [--include-cucumber=INCLUDE_CUCUMBER]  # Include a specific cucumber test (verify, internal, node, api, etc)
-		  [--include-coverage]                   # Include coverage analysis on unit tests
 		  [--include-extended=INCLUDE_EXTENDED]  # Include extended tests
 		  [--disable-charlie]                    # Disable idle shutdown timer on dev instance (charlie)
 		  [--mcollective-logs]                   # Don't allow mcollective logs to be deleted on rotation
@@ -143,21 +143,12 @@ The tools can be invoked using [/build/devenv](https://github.com/openshift/orig
 		  [--retry-failure-with-tag]  # If a package fails to build, tag it and retry the build.
 		                              # Default: true
 
-
-### Fedora 17 Remix
-
-  * ./build/devenv build_livecd
-
-	Build a Feodra 17 remix CD with OpenShift Origin installed and configured on it
-
-
 ## Related repositories
 
  * [Origin-Server](https://github.com/openshift/origin-server) Origin-server contains the core server components of the OpenShift service released under the [OpenShift Origin source
 project](https://openshift.redhat.com/community/open-source).
  * [Origin Community Cartridges](https://github.com/openshift/origin-community-cartridges) Collection of OpenShift Origin cartridges contributed by community members.
  * [RHC](https://github.com/openshift/rhc) The OpenShift command line tools allow you to manage your OpenShift applications from the command line.
- * [puppet-openshift_origin](https://github.com/openshift/puppet-openshift_origin) Puppet scripts to install and configure OpenShift Origin on Fedora 17.
 
 ## Contributing
 

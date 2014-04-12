@@ -325,7 +325,7 @@ module OpenShift
       if @validation_output == "PASS"
         return true
       else
-        puts "Node Acceptance Output = #{@validation_output}"
+        puts "Devenv Acceptance Output = #{@validation_output}"
         return false
       end
     end
@@ -388,8 +388,8 @@ module OpenShift
         (1..num_retries).each do |index|
           begin
             sleep 30 until image.state == :available
-            puts "Sleeping for 30 seconds to let image stabilize..."
-            sleep 30
+            puts "Sleeping for 10 seconds to let image stabilize..."
+            sleep 10
             unless can_ssh?(instance.dns_name, ssh_user)
               repair_ssh(instance, 8, ssh_user)
             end

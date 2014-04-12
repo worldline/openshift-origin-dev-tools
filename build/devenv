@@ -318,10 +318,9 @@ retries = 0
           puts "Building #{build_dir}"
           #unless run("tito build --builder mock --builder-arg mock=fedora-18-x86_64 --rpm", :verbose => options.verbose?)
           unless run(tito_cmd, :verbose => options.verbose?)
-            failed_builds << build_dir 
+            failed_builds << build_dir
             puts "Build failed"
             exit 1
-          else
           end
         end
       end
@@ -504,7 +503,7 @@ retries = 0
 
       def idle_all_gears(hostname)
         puts "Idling all gears on remote instance: #{hostname}"
-        ssh(hostname, "sudo bash -c '/sbin/service #{SCL_PREFIX}mcollective stop; /sbin/service #{SCL_PREFIX}mcollective start; /sbin/service openshift-port-proxy restart;'", 240, false, 1, options.ssh_user)
+        ssh(hostname, "sudo bash -c '/sbin/service #{SCL_PREFIX}mcollective stop; /sbin/service #{SCL_PREFIX}mcollective start;'", 240, false, 1, options.ssh_user)
         ssh(hostname, 'for dir in /var/lib/openshift/*; do if [ -d $dir ] && [ ! -h $dir ] ; then sudo bash -c "oo-idler -n -u `basename $dir`"; fi; done;', 240, false, 1, options.ssh_user)
         ssh(hostname, 'sudo bash -c "/sbin/service httpd graceful"', 240, false, 1, options.ssh_user)
       end

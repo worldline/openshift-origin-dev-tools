@@ -3,31 +3,6 @@
 #
 
 OPTIONS = {
-  "fedora-19" => {
-    "amis"            => {"us-east-1" =>"ami-b22e5cdb"},
-    "devenv_name"     => "oso-fedora",
-    "ignore_packages" => [
-      'openshift-origin-util-scl',
-      'rubygem-openshift-origin-auth-kerberos',
-
-      #carts
-      #'openshift-origin-cartridge-ruby',
-      #'openshift-origin-cartridge-perl',
-      #'openshift-origin-cartridge-python',
-      'openshift-origin-cartridge-jbosseap',
-      #'openshift-origin-cartridge-jbossas',
-      'openshift-origin-cartridge-jbossews',
-      #'openshift-origin-cartridge-mysql',
-      #'openshift-origin-cartridge-cron',
-      #'openshift-origin-cartridge-ceylon',
-      #'openshift-origin-cartridge-tomcat',
-      'openshift-origin-cartridge-switchyard',
-      'rubygem-openshift-origin-container-libvirt',
-      #'rubygem-openshift-origin-admin-console',
-    ],
-    "cucumber_options"        => '--strict -f progress -f html -t ~@not-origin',
-    "broker_cucumber_options" => '--strict -f progress -f html --out /tmp/rhc/broker_cucumber.html -f progress',
-  },
   "rhel"   => {
     "amis"            => {"us-east-1" =>"ami-7d0c6314"},
     "devenv_name"     => "oso-rhel",
@@ -44,11 +19,10 @@ OPTIONS = {
       'openshift-origin-cartridge-ceylon',
       'openshift-origin-cartridge-tomcat',
       'openshift-origin-cartridge-ceylon-0.5',
-      #'rubygem-openshift-origin-admin-console',
       'rubygem-openshift-origin-container-libvirt',
     ],
     "cucumber_options"        => '--strict -f progress -f junit --out /tmp/rhc/cucumber_results -t ~@fedora-only -t ~@jboss -t ~@not-origin',
-    "broker_cucumber_options" => '--strict -f html --out /tmp/rhc/broker_cucumber.html -f progress  -t ~@fedora-only -t ~@jboss',    
+    "broker_cucumber_options" => '--strict -f html --out /tmp/rhc/broker_cucumber.html -f progress  -t ~@fedora-only -t ~@jboss'
   },
 }
 
@@ -106,7 +80,7 @@ def guess_os(base_os=nil)
   end
 end
 
-def def_constants(base_os="fedora-19")
+def def_constants(base_os="rhel")
   Object.const_set(:AMI, OPTIONS[base_os]["amis"]) unless Object.const_defined?(:AMI)
   Object.const_set(:DEVENV_NAME, OPTIONS[base_os]["devenv_name"]) unless Object.const_defined?(:DEVENV_NAME)
   Object.const_set(:IGNORE_PACKAGES, OPTIONS[base_os]["ignore_packages"]) unless Object.const_defined?(:IGNORE_PACKAGES)

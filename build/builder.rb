@@ -61,6 +61,7 @@ module OpenShift
       prereqs = installed.map(&:yum_name) - SKIP_PREREQ_PACKAGES
       puts "\n\nExcluded prereqs\n  #{SKIP_PREREQ_PACKAGES.join("\n  ")}" unless SKIP_PREREQ_PACKAGES.empty?
       puts "\n\nInstalling all prereqs\n  #{prereqs.join("\n  ")}"
+      puts "yum install -y #{prereqs.join(' ')}"
       raise "Unable to install prerequisite packages" unless system "yum install -y #{prereqs.join(' ')}"
 
       prereqs = (phases[1..-1] || []).flatten(1).map(&:build_requires).flatten(1).uniq.sort - installed
@@ -410,7 +411,7 @@ module OpenShift
         repo_git_url = SIBLING_REPOS_GIT_URL[repo_name]
         git_clone_commands += "pushd ..\n"
         git_clone_commands += "if [ ! -d #{repo_name} ]; then\n" unless options.replace?
-        git_clone_commands += "rm -rf #{repo_name}; git clone #{repo_git_url};\n"
+        git_clone_commands += "rm -rf #{repo_name}; git clone #{repo_git_url} #{repo_name};\n"
         git_clone_commands += "fi\n" unless options.replace?
         git_clone_commands += "pushd #{repo_name}\n"
         git_clone_commands += "git checkout #{branch}\n"

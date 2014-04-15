@@ -42,9 +42,9 @@ CAN_SSH_TIMEOUT=90
 SLEEP_AFTER_LAUNCH=60
 
 SIBLING_REPOS = {
-  'origin-server' => ['../origin-server'],
-  'rhc' => ['../rhc'],
-  'origin-dev-tools' => ['../origin-dev-tools'],
+  'origin-server' => ['../openshift-origin-server'],
+  'rhc' => ['../openshift-rhc'],
+  'origin-dev-tools' => ['../openshift-origin-dev-tools'],
   #'openshift-pep' => ['../openshift-pep'],
   #'puppet-openshift_origin' => ['../puppet-openshift_origin'],
 }

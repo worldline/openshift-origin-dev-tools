@@ -45,16 +45,16 @@ SIBLING_REPOS = {
   'origin-server' => ['../origin-server'],
   'rhc' => ['../rhc'],
   'origin-dev-tools' => ['../origin-dev-tools'],
-  'openshift-pep' => ['../openshift-pep'],
-  'puppet-openshift_origin' => ['../puppet-openshift_origin'],
+  #'openshift-pep' => ['../openshift-pep'],
+  #'puppet-openshift_origin' => ['../puppet-openshift_origin'],
 }
 OPENSHIFT_ARCHIVE_DIR_MAP = {'rhc' => 'rhc/'}
 SIBLING_REPOS_GIT_URL = {
-  'origin-server' => 'https://github.com/openshift/origin-server.git',
-  'rhc' => 'https://github.com/openshift/rhc.git',
-  'origin-dev-tools' => 'https://github.com/openshift/origin-dev-tools.git',
-  'openshift-pep' => 'https://github.com/openshift/openshift-pep.git',
-  'puppet-openshift_origin' => 'https://github.com/openshift/puppet-openshift_origin.git'
+  'origin-server' => 'https://github.com/worldline/openshift-origin-server.git',
+  'rhc' => 'https://github.com/worldline/openshift-rhc.git',
+  'origin-dev-tools' => 'https://github.com/worldline/openshift-origin-dev-tools.git',
+  #'openshift-pep' => 'https://github.com/openshift/openshift-pep.git',
+  #'puppet-openshift_origin' => 'https://github.com/openshift/puppet-openshift_origin.git'
 }
 
 DEV_TOOLS_REPO = 'origin-dev-tools'

@@ -85,7 +85,7 @@ module SetupHelper
   # Create a RPM repository for OpenShift Origin dependencies available on the mirror.openshift.com site
   def self.create_openshift_deps_rpm_repository
     if(guess_os == "rhel" or guess_os == "centos")
-      url = "https://mirror.openshift.com/pub/origin-server/nightly/rhel-6/dependencies/x86_64/"
+      url = "https://mirror.openshift.com/pub/openshift/release/3/rhel-6/dependencies/x86_64/"
     elsif guess_os == "fedora-19"
       url = "https://mirror.openshift.com/pub/origin-server/nightly/fedora-19/dependencies/x86_64/"
     end
